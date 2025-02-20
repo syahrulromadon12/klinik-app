@@ -6,20 +6,31 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('phone_number')->unique();
+            $table->date('date_of_birth');
+            $table->string('address');
+            $table->enum('gender', ['male', 'female', 'other']);
+            $table->string('nik_number')->nullable()->unique();
+            $table->string('kis_number')->nullable()->unique();
+            $table->enum('blood_type', ['A', 'B', 'AB', 'O', 'unknown'])->default('unknown');
+            $table->string('emergency_contact_name')->nullable();
+            $table->string('emergency_contact_phone')->nullable();
+            $table->string('insurance_number')->nullable()->unique();
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->foreignUuid('role_id')->constrained()->onDelete('cascade');
+            $table->string('photo_path')->nullable();
             $table->rememberToken();
             $table->timestamps();
-        });
+            $table->softDeletes()->nullable();
+        });        
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
@@ -37,9 +48,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');
