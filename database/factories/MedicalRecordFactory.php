@@ -23,9 +23,6 @@ class MedicalRecordFactory extends Factory
             'medical_staff_id' => \App\Models\MedicalStaff::factory(),
             'clinic_id' => \App\Models\Clinic::factory(),
             'appointment_id' => \App\Models\Appointment::factory(),
-            'diagnosis' => $this->faker->sentence,
-            'symptoms' => $this->faker->sentence,
-            'notes' => $this->faker->sentence,
             'prescription_id' => \App\Models\Prescription::factory(),
         ];
     }

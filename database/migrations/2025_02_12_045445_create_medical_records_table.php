@@ -17,9 +17,6 @@ return new class extends Migration
             $table->foreignUuid('medical_staff_id')->constrained('medical_staff')->onDelete('cascade');
             $table->foreignUuid('appointment_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('clinic_id')->constrained()->onDelete('cascade'); 
-            $table->text('diagnosis');
-            $table->text('symptoms'); 
-            $table->text('notes')->nullable();
             $table->foreignUuid('prescription_id')->constrained()->onDelete('cascade'); 
             $table->timestamps();
             $table->softDeletes()->nullable();

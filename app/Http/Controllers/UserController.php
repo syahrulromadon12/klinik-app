@@ -32,7 +32,18 @@ class UserController extends Controller
         }
     }
 
-    public function store(Request $request) //err null work_schedule
+    public function profile(Request $request){
+        try{
+            $profile = User::with('role', 'medicalStaff')->findOrFail($request->user()->id);
+            return ApiResponse::success(new UserDetailResource($profile), "Profile retrieved successfully");
+        }catch(ModelNotFoundException $e){
+            return ApiResponse::error("Profile not found", [], 404);
+        }catch(\Exception $e){  
+            return ApiResponse::error("Failed to retrieve profile", [], 500);
+        }
+    }
+
+    public function store(Request $request) 
     {
         try {
             // Validate the incoming request
@@ -119,7 +130,7 @@ class UserController extends Controller
             // Log the exception and return a generic error response
             Log::error($e->getMessage());
             \DB::rollBack();  // Rollback transaction in case of failure
-            return ApiResponse::error("Failed to create user", [], 500);
+            return ApiResponse::error("Failed to create user", 500);
         }
     }
 
@@ -188,24 +199,21 @@ class UserController extends Controller
                 'insurance_number' => $request->insurance_number ?? $user->insurance_number,
             ]);
 
-            // Update medical staff data
-            // Pastikan user memiliki medical staff
-$medicalStaff = $user->medicalStaff;
+            $medicalStaff = $user->medicalStaff;
 
-if ($medicalStaff) {
-    $medicalStaff->update([
-        'license_number' => $request->license_number ?? $medicalStaff->license_number,
-        'specialization' => $request->specialization ?? $medicalStaff->specialization,
-        'work_schedule' => $request->work_schedule ? json_encode(json_decode($request->work_schedule, true)) : $medicalStaff->work_schedule,
-        'experience_years' => $request->experience_years ?? $medicalStaff->experience_years,
-        'education' => $request->education ?? $medicalStaff->education,
-        'consultation_fee' => $request->consultation_fee ?? $medicalStaff->consultation_fee,
-        'clinic_id' => $request->clinic_id ?? $medicalStaff->clinic_id,
-    ]);
-} else {
-    return ApiResponse::error("Medical staff data not found for this user.", [], 404);
-}
-         
+            if ($medicalStaff) {
+                $medicalStaff->update([
+                    'license_number' => $request->license_number ?? $medicalStaff->license_number,
+                    'specialization' => $request->specialization ?? $medicalStaff->specialization,
+                    'work_schedule' => $request->work_schedule ? json_encode(json_decode($request->work_schedule, true)) : $medicalStaff->work_schedule,
+                    'experience_years' => $request->experience_years ?? $medicalStaff->experience_years,
+                    'education' => $request->education ?? $medicalStaff->education,
+                    'consultation_fee' => $request->consultation_fee ?? $medicalStaff->consultation_fee,
+                    'clinic_id' => $request->clinic_id ?? $medicalStaff->clinic_id,
+                ]);
+            } else {
+                return ApiResponse::error("Medical staff data not found for this user.", [], 404);
+            }         
 
             // Commit the transaction
             \DB::commit();
@@ -223,7 +231,7 @@ if ($medicalStaff) {
     public function show($id)
     {
         try {
-            $user = User::with('role', 'medicalStaff')->findOrFail($id);
+            $user = User::with('role', 'medicalStaff', )->findOrFail($id);
             return ApiResponse::success(new UserDetailResource($user), "User retrieved successfully");
         } catch (ModelNotFoundException $e) {
             return ApiResponse::error("User not found", [], 404);

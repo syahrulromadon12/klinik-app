@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\HasApiTokens;
 use App\Helpers\ApiResponse;
+use App\Http\Resources\LoginResource;
 use Exception;
 
 class AuthController extends Controller
@@ -64,24 +65,36 @@ class AuthController extends Controller
 
             // Pastikan `sanctum` digunakan sebelum generate token
             if (!method_exists($user, 'createToken')) {
-                return ApiResponse::error(
-                    'Personal Access Token feature is not available. Make sure Laravel Sanctum is installed and configured correctly.',
-                    [],
-                    500
-                );
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Personal Access Token feature is not available. Make sure Laravel Sanctum is installed and configured correctly.',
+                    'data' => [],
+                ], 500);
             }
 
             // Buat token
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            return ApiResponse::success([
-                'access_token' => $token,
-                'token_type' => 'Bearer'
-            ], 'Login successful');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Login successful',
+                'data' => array_merge(
+                    (new LoginResource($user))->toArray($request),
+                    ['token' => $token]
+                )
+            ]);
         } catch (ValidationException $e) {
-            return ApiResponse::error('Validation error', $e->errors(), 422);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation error',
+                'data' => $e->errors(),
+            ], 422);
         } catch (Exception $e) {
-            return ApiResponse::error('Failed to login', ['error' => $e->getMessage()], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to login',
+                'data' => ['error' => $e->getMessage()],
+            ], 500);
         }
     }
 

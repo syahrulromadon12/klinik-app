@@ -31,7 +31,7 @@ class MedicalStaffFactory extends Factory
                 'S1', 'S2', 'S3', 'Profesi'
             ]),
             'consultation_fee' => $this->faker->numberBetween(100000, 500000),
-            'clinic_id' => \App\Models\Clinic::factory()
+            'clinic_id' => \App\Models\Clinic::inRandomOrder()->first()->id,
         ];
     }
 

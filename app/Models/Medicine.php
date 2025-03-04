@@ -17,4 +17,9 @@ class Medicine extends Model
         'stock',
         'price',
     ];
+
+    public function medicalCategory()
+    {
+        return $this->belongsTo(MedicalCategory::class, 'medical_category_id');
+    }
 }
